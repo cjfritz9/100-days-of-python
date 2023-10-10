@@ -33,13 +33,13 @@ while game_is_on:
     scoreboard.increase_score()
   
   if snake.boundary_collision():
-    game_is_on = False
-    scoreboard.game_over()
+    scoreboard.reset()
+    snake.reset()
 
   for segment in snake.segments[2:]:
     if snake.head.distance(segment) < 15:
-      game_is_on = False
-      scoreboard.game_over()
+      scoreboard.reset()
+      snake.reset()
 
 
 
