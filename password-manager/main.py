@@ -1,5 +1,5 @@
 import os, sys
-import pandas
+import json
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -22,6 +22,37 @@ def resource_path(relative_path):
     base_path = os.path.dirname(os.path.abspath(__file__))
 
   return os.path.join(base_path, relative_path)
+
+# ---------------------------- WEBSITE SEARCH ------------------------------- #
+def website_search():
+  query = website_input.get()
+
+  if len(query) == 0:
+    messagebox.showerror(title='Invalid input', message='Please enter a website name.')
+  else:    
+    try:
+      with open('data.json', "r") as data_file:
+        data = json.load(data_file)
+
+    except FileNotFoundError:
+      messagebox.showerror(title='No Data', message='No saved passwords found.\nIf you have previously saved\npasswords make sure the\ndata.json file is in the same\ndirectory as this program.')
+
+    else:
+      try:
+        result = data[query]
+        print(result)
+      except KeyError:
+        messagebox.showerror(title='No Results', message=f'No passwords for {query}.')
+      
+      else:
+        copy_password = messagebox.askyesno(title="Success", message=f"{query}\nLogin: {result['email_user']}\nPassword: {result['password']}\nWould you like to copy the password?")
+
+        if copy_password:
+          copy(result['password'])
+
+
+
+
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generate_password():
@@ -59,19 +90,28 @@ def save_password():
     messagebox.showerror(title='Invalid', message='Fill out all fields!')
     return
 
-  entry_dict = pandas.DataFrame({
-    'Website': website,
-    'Email/User': email_user,
-    'Password': password 
-  }, index=[0])
+  new_data = {
+    website: {
+      "email_user": email_user,
+      "password": password
+    }
+  }
+  try:
+    with open("data.json", "r") as data_file:
+      data = json.load(data_file)
 
-  is_confirmed = messagebox.askokcancel(title=website, message=f"Is this correct?: \nEmail: {email_user} \nPassword: {password}")
+  except FileNotFoundError:
+    with open("data.json", "w") as data_file:
+      json.dump(new_data, data_file, indent=2)
+  else:
+    data.update(new_data)
 
-  if is_confirmed:
-    entry_dict.to_csv('data.csv', mode='a', header=False)
+    with open("data.json", "w") as data_file:
+      json.dump(data, data_file, indent=2)
+  finally:
     website_input.delete(0, END)
     password_input.delete(0, END)
-    print(pandas.read_csv('data.csv'))
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 # ------------------ WINDOW --------------------- #
@@ -98,7 +138,7 @@ password_label.grid(column=0, row=3)
 
 # ------------------ INPUTS --------------------- #
 website_input = Entry(width=36)
-website_input.grid(column=1, row=1, columnspan=2, sticky="EW", ipady=4)
+website_input.grid(column=1, row=1, sticky="EW", ipady=4)
 website_input.focus()
 
 email_user_input = Entry(width=36)
@@ -109,6 +149,9 @@ password_input = Entry(width=16)
 password_input.grid(column=1, row=3, sticky="EW", ipady=4)
 
 # ------------------ BUTTONS --------------------- #
+search_website_button = Button(text='Search', width=15, font=BUTTON_FONT, command=website_search)
+search_website_button.grid(column=2, row=1, sticky="EW")
+
 generate_password_button = Button(text='Generate Password', width=15, font=BUTTON_FONT, command=generate_password)
 generate_password_button.grid(column=2, row=3, sticky="EW")
 

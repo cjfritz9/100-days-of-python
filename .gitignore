@@ -2,4 +2,5 @@
 **/dist
 **/output
 **/*.exe
+**/*.json
 **/*.csv
