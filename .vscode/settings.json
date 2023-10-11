@@ -1,7 +1,9 @@
 {
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
   },
-  // "python.formatting.provider": "none"
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none"
+},
 }
